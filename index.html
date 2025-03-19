@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>ARDUINO-2BUTTONS</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+<style>
+body,h1,h2,h3,h4,h5 {font-family: "Poppins", sans-serif}
+body {font-size:16px;}
+.w3-half img{margin-bottom:-6px;margin-top:16px;opacity:0.8;cursor:pointer}
+.w3-half img:hover{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- Sidebar/menu -->
+<nav class="w3-sidebar w3-red w3-collapse w3-top w3-large w3-padding" style="z-index:3;width:300px;font-weight:bold;" id="mySidebar"><br>
+  <a href="javascript:void(0)" onclick="w3_close()" class="w3-button w3-hide-large w3-display-topleft" style="width:100%;font-size:22px">Close Menu</a>
+  <div class="w3-container">
+    <h3 class="w3-padding-64"><b>ROBOTICA<br>PROJECT</b></h3>
+  </div>
+  <div class="w3-bar-block">
+    <a href="#home" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Home</a> 
+    <a href="#overview" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Overview</a> 
+    <a href="#photos" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Photos</a>
+    <a href="#hardware" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Hardware</a> 
+    <a href="#software" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Software</a> 
+    <a href="#timeline" onclick="w3_close()" class="w3-bar-item w3-button w3-hover-white">Timeline</a>
+  </div>
+</nav>
+
+<!-- Top menu on small screens -->
+<header class="w3-container w3-top w3-hide-large w3-red w3-xlarge w3-padding">
+  <a href="javascript:void(0)" class="w3-button w3-red w3-margin-right" onclick="w3_open()">☰</a>
+  <span>ROBOTICA-PROJECT</span>
+</header>
+
+<!-- Overlay effect when opening sidebar on small screens -->
+<div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
+
+<!-- !PAGE CONTENT! -->
+<div class="w3-main" style="margin-left:340px;margin-right:40px">
+
+  <!-- Home -->
+  <div class="w3-container" style="margin-top:80px" id="home">
+    <h1 class="w3-jumbo"><b>ARDUINO-2BUTTONS</b></h1>
+    </div>
+  
+  
+
+  <!-- Overview -->
+  <div class="w3-container" id="overview" style="margin-top:75px">
+    <h1 class="w3-xxxlarge w3-text-red"><b>Overview.</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+    <p><b>Reaction Speed Tester for Left and Right Hand</b>:</p>
+    <p> This project allows you to test the reaction speed of your left and right hand using Arduino, a display, and two buttons.<br> 
+        The program will record the time it takes to press each button, compare the times, display the result in milliseconds, and turn on the corresponding LED.<br>
+        After every 10 pairs of button presses, the average value will be displayed on the screen, and the corresponding LED will light up.
+    </p>
+  </div>
+
+<!-- Photos -->
+  <div class="w3-container" style="margin-top:80px" id="photos">
+    <h1 class="w3-xxxlarge w3-text-red"><b>Photos.</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+  </div>
+  
+
+<!-- Photo grid (modal) -->
+  <div class="w3-row-padding">
+    <div class="w3-half">
+      <img src="images/IMG_7270_1.jpg" style="width:100%" onclick="onClick(this)" alt="Concrete meets bricks">
+      <img src="images/IMG_7287_3.jpg" style="width:100%" onclick="onClick(this)" alt="White walls with designer chairs">
+    </div>
+
+<div class="w3-half">
+      <img src="images/IMG_7279_2.jpg" style="width:100%" onclick="onClick(this)" alt="White walls with designer chairs">
+      <img src="images/IMG_7289_4.jpg" style="width:100%" onclick="onClick(this)" alt="White walls with designer chairs">
+    </div>
+
+    </div>
+
+  <!-- Modal for full size images on click-->
+  <div id="modal01" class="w3-modal w3-black" style="padding-top:0" onclick="this.style.display='none'">
+    <span class="w3-button w3-black w3-xxlarge w3-display-topright">×</span>
+    <div class="w3-modal-content w3-animate-zoom w3-center w3-transparent w3-padding-64">
+      <img id="img01" class="w3-image">
+      <p id="caption"></p>
+    </div>
+  </div>
+  
+  <!-- Hardware -->
+  <div class="w3-container" id="hardware" style="margin-top:75px">
+    <h1 class="w3-xxxlarge w3-text-red"><b>Hardware.</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+    <p><b>Components</b>:</p>
+<ul>
+  <li>Arduino to process the data</li>
+  <li>2 buttons for the left and right hand</li>
+  <li>3 LEDs to indicate the results</li>
+  <li>LCD display to show the times</li>
+  <li>Wires for connection</li>
+  <li>USB cable</li>
+</ul>  
+
+<p><b>Connections</b>:</p>
+<ul>
+  <li>Electrical circuit (link will be coming soon)</li>
+  <li>Table of connections (link will be coming soon)</li>
+  </ul>  
+
+    
+  </div>
+
+<!-- Software -->
+  <div class="w3-container" id="software" style="margin-top:75px">
+    <h1 class="w3-xxxlarge w3-text-red"><b>Software.</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+    <p><b>Our designers are thoughtfully chosen</b>:</p>
+    <p><b>Components</b>:</p>
+<ul>
+  <li>Arduino to process the data</li>
+  <li>2 buttons for the left and right hand</li>
+  <li>3 LEDs to indicate the results</li>
+  <li>LCD display to show the times</li>
+  <li>Wires for connection</li>
+  <li>USB cable</li>
+</ul>  
+
+    
+  </div>
+
+
+    
+ <!-- Timeline -->
+  <div class="w3-container" id="timeline" style="margin-top:75px">
+    <h1 class="w3-xxxlarge w3-text-red"><b>Timeline.</b></h1>
+    <hr style="width:50px;border:5px solid red" class="w3-round">
+    
+  <button type="button">2025.03.21</button>
+  <ul>
+   <li>Project web-page creating</li>
+   <li>Publish in GitHub Pages</li>
+  </ul>  
+ <button type="button">2025.03.14</button>
+  <ul>
+   <li>Arduino sketch writing</li>
+   <li>Testing and debugging</li>
+  </ul>  
+ <button type="button">2025.03.07</button>
+  <ul>
+   <li>Connections and testing</li>
+   <li>Arduino IDE sofware installation</li>
+  </ul>  
+ <button type="button">2025.02.28</button>
+  <ul>
+   <li>The project idea</li>
+   <li>Selection of components</li>
+  </ul>  
+
+    
+  </div>
+
+
+<!-- End page content -->
+</div>
+
+<!--  Container -->
+<div class="w3-light-grey w3-container w3-padding-32" style="margin-top:75px;padding-right:58px"><p class="w3-right">Powered by <a href="https://github.com" title="GITHUB" target="_blank" class="w3-hover-opacity">github.com</a></p></div>
+
+<script>
+// Script to open and close sidebar
+function w3_open() {
+  document.getElementById("mySidebar").style.display = "block";
+  document.getElementById("myOverlay").style.display = "block";
+}
+ 
+function w3_close() {
+  document.getElementById("mySidebar").style.display = "none";
+  document.getElementById("myOverlay").style.display = "none";
+}
+
+// Modal Image Gallery
+function onClick(element) {
+  document.getElementById("img01").src = element.src;
+  document.getElementById("modal01").style.display = "block";
+  var captionText = document.getElementById("caption");
+  captionText.innerHTML = element.alt;
+}
+</script>
+
+</body>
+</html>
