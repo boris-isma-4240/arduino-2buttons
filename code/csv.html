@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Arduino CSV Log Viewer</title>
+  <style>
+    /* Page style */
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #ffffff; /* white background */
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    /* Table style */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      background: #ffffff;
+      table-layout: fixed; /* equal column widths */
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center; /* center all content */
+      width: 25%;
+      overflow-wrap: break-word; /* wrap long words */
+    }
+
+    th {
+      background-color: #f2f2f2; /* gray header row */
+    }
+
+    caption {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    #output, #bestResults {
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 6px 12px;
+      margin-left: 10px;
+    }
+
+    /* Red text for best BTN */
+    .highlight-btn {
+      color: red;
+      font-weight: bold;
+    }
+
+    /* Blue text for best REACT */
+    .highlight-react {
+      color: blue;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header and buttons in one line -->
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <h2 style="margin: 0;">📄 Load Arduino CSV Log</h2>
+    <button id="openBtn">📂 Open CSV</button>
+    <button id="reloadBtn" disabled>🔁 Reload</button>
+    <img src="4240_ISMA.JPG" style="width:10%" onclick="onClick(this)" alt="Foto 2">
+  </div>
+
+  <!-- Best result table goes here -->
+  <div id="bestResults"></div>
+
+  <!-- Full CSV result table goes here -->
+  <div id="output"></div>
+
+  <script>
+    let fileHandle = null;
+    let autoReloadTimer = null;
+
+    // Read the CSV file and display both tables
+    async function readAndDisplayCSV() {
+      if (!fileHandle) return;
+
+      const file = await fileHandle.getFile();       // open file
+      const text = await file.text();                // read content
+      const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+      if (lines.length === 0) return;
+
+      let headers = [];
+      let bestBTN = null;
+      let bestREACT = null;
+      const rows = [];
+
+      // Process each line in the CSV
+      lines.forEach((line, index) => {
+        const cells = line.split(',').map(cell => cell.trim());
+
+        if (index === 0) {
+          headers = cells; // first line is headers
+          return;
+        }
+
+        if (cells.length < 4) return;
+
+        const [timestamp, program, data1, data2] = cells;
+
+        // Check best BTN (lowest average and deviation)
+        if (program === "BTN" && !isNaN(data1) && !isNaN(data2)) {
+          const d1 = parseInt(data1);
+          const d2 = parseInt(data2);
+          const avg = (d1 + d2) / 2;
+          const diff = Math.abs(d1 - d2);
+          if (!bestBTN || avg < bestBTN.avg || (avg === bestBTN.avg && diff < bestBTN.diff)) {
+            bestBTN = { timestamp, data1: d1, data2: d2, avg, diff };
+          }
+        }
+
+        // Check best REACT (highest %, lowest time)
+        if (program === "REACT") {
+          const cleanPercent = data1.replace('%', '').trim();
+          const cleanTime = data2.replace('s', '').trim();
+          const percent = parseInt(cleanPercent);
+          const time = parseFloat(cleanTime);
+          if (!isNaN(percent) && !isNaN(time)) {
+            if (!bestREACT || percent > bestREACT.percent || (percent === bestREACT.percent && time < bestREACT.time)) {
+              bestREACT = { timestamp, data1: data1.trim(), data2: data2.trim(), percent, time };
+            }
+          }
+        }
+
+        rows.push(cells); // add this row to full table
+      });
+
+      // ==== Build Best Results Table ====
+      const bestTable = document.createElement('table');
+      const bestCaption = document.createElement('caption');
+      bestCaption.textContent = "🏆 Best Results";
+      bestTable.appendChild(bestCaption);
+
+      const bestHeader = document.createElement('tr');
+      ['Program', 'Timestamp', 'Data1', 'Data2'].forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        bestHeader.appendChild(th);
+      });
+      bestTable.appendChild(bestHeader);
+
+      // Add best BTN
+      if (bestBTN) {
+        const row = document.createElement('tr');
+        ['BTN', bestBTN.timestamp, bestBTN.data1, bestBTN.data2].forEach(val => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          td.classList.add('highlight-btn');
+          row.appendChild(td);
+        });
+        bestTable.appendChild(row);
+      }
+
+      // Add best REACT
+      if (bestREACT) {
+        const row = document.createElement('tr');
+        ['REACT', bestREACT.timestamp, bestREACT.data1, bestREACT.data2].forEach(val => {
+          const td = document.createElement('td');
+          td.textContent = val;
+          td.classList.add('highlight-react');
+          row.appendChild(td);
+        });
+        bestTable.appendChild(row);
+      }
+
+      document.getElementById('bestResults').innerHTML = '';
+      document.getElementById('bestResults').appendChild(bestTable);
+
+      // ==== Build Full Results Table ====
+      const fullTable = document.createElement('table');
+      const caption = document.createElement('caption');
+      caption.textContent = file.name + ' (updated ' + new Date().toLocaleTimeString() + ')';
+      fullTable.appendChild(caption);
+
+      // Add header row
+      const headerRow = document.createElement('tr');
+      headers.forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        headerRow.appendChild(th);
+      });
+      fullTable.appendChild(headerRow);
+
+      // Add data rows, newest first
+      rows.forEach(cells => {
+        const [timestamp, program, data1, data2] = cells;
+        const row = document.createElement('tr');
+
+        const isBestBTN = bestBTN &&
+          program === "BTN" &&
+          timestamp === bestBTN.timestamp &&
+          data1 === String(bestBTN.data1) &&
+          data2 === String(bestBTN.data2);
+
+        const isBestREACT = bestREACT &&
+          program === "REACT" &&
+          timestamp === bestREACT.timestamp &&
+          data1 === bestREACT.data1 &&
+          data2 === bestREACT.data2;
+
+        // Create each cell in the row
+        cells.forEach(cell => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          if (isBestBTN) td.classList.add('highlight-btn');
+          if (isBestREACT) td.classList.add('highlight-react');
+          row.appendChild(td);
+        });
+
+        // Add this row to top of table (newest first)
+        fullTable.insertBefore(row, fullTable.rows[1]);
+      });
+
+      document.getElementById('output').innerHTML = '';
+      document.getElementById('output').appendChild(fullTable);
+    }
+
+    // Select CSV file
+    document.getElementById('openBtn').addEventListener('click', async () => {
+      try {
+        [fileHandle] = await window.showOpenFilePicker({
+          types: [{ description: 'CSV Files', accept: { 'text/csv': ['.csv'] } }],
+          excludeAcceptAllOption: false,
+          multiple: false
+        });
+        document.getElementById('reloadBtn').disabled = false;
+        await readAndDisplayCSV();
+
+        // Auto reload every 10 seconds
+        if (autoReloadTimer) clearInterval(autoReloadTimer);
+        autoReloadTimer = setInterval(readAndDisplayCSV, 10000);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    // Reload data manually
+    document.getElementById('reloadBtn').addEventListener('click', async () => {
+      await readAndDisplayCSV();
+    });
+  </script>
+
+</body>
+</html>
